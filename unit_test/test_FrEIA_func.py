@@ -1,3 +1,5 @@
+"""Sanity check of FrEIA function
+"""
 import sys, os
 
 myPath = os.path.dirname(os.path.abspath(__file__))
@@ -62,11 +64,15 @@ class TestBasicLayers:
         x = torch.ones((2, 1))
         with torch.no_grad():
             torch_linear_layer = nn.Linear(in_features=1, out_features=2)  # mat size: (in_features x out_features)
+            # Initialize nn.Linear with specific weights
+            # see https://discuss.pytorch.org/t/initialize-nn-linear-with-specific-weights/29005/3
             torch_linear_layer.weight.copy_(torch.ones(2, 1))
             torch_linear_layer.bias.copy_(torch.zeros(2,))
             torch_y = torch_linear_layer(x)
 
         x = tf.ones((2, 1))
+        # Custom weight initialization tensorflow tf.layers.dense
+        # see https://stackoverflow.com/questions/49501538/custom-weight-initialization-tensorflow-tf-layers-dense
         init = tf.constant_initializer(value=1)
         tf_linear_layer = keras.layers.Dense(units=2, kernel_initializer=init)
         tf_y = tf_linear_layer(x)
@@ -75,6 +81,76 @@ class TestBasicLayers:
         tf_np = tf_y.numpy()
         assert torch_np.shape, "array torch_y is empty"
         assert tf_np.shape, "array tf_y is empty"
+        assert (np.array_equal(torch_np, tf_np))
+
+    def test_relu(self):
+        """
+
+
+        torch.nn.ReLU(inplace: bool = False)
+        see https://pytorch.org/docs/stable/generated/torch.nn.ReLU.html
+        """
+        x1 = torch.ones((2, 1))
+        torch_relu_layer = nn.ReLU()
+        torch_y1 = torch_relu_layer(x1)
+
+        x1 = tf.ones((2, 1))
+        tf_relu_layer = keras.layers.ReLU()
+        tf_y1 = tf_relu_layer(x1)
+
+        torch_np = torch_y1.detach().numpy()
+        tf_np = tf_y1.numpy()
+        assert torch_np.shape, "array torch_y is empty"
+        assert tf_np.shape, "array tf_y is empty"
+        assert (np.array_equal(torch_np, tf_np))
+
+        # x_minus_1 = np.full((2, 1), -1)
+        # torch_minus_1 = torch_relu_layer(x_minus_1)
+
+    def test_batch_norm(self):
+        """
+        torch.nn.BatchNorm1d(num_features, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        see https://pytorch.org/docs/stable/generated/torch.nn.BatchNorm1d.html
+        source code https://github.com/pytorch/pytorch/blob/master/torch/nn/modules/batchnorm.py
+
+        tf.keras.layers.BatchNormalization(
+            axis=-1,
+            momentum=0.99,
+            epsilon=0.001,
+            center=True,
+            scale=True,
+            beta_initializer="zeros", gamma_initializer="ones",
+            moving_mean_initializer="zeros", moving_variance_initializer="ones",
+            beta_regularizer=None, gamma_regularizer=None,
+            beta_constraint=None, gamma_constraint=None,
+            **kwargs
+        )
+
+        BatchNormalization layer
+        see https://keras.io/api/layers/normalization_layers/batch_normalization/
+        """
+        epsilon = 10 ** -4
+        momentum = 10 ** -1
+        batch = 2
+        x1 = torch.ones((batch, 1))  # (N, C)
+        torch_batch_norm_layer = nn.BatchNorm1d(
+            num_features=1,
+            eps=epsilon,
+            momentum=momentum
+        )
+        torch_y1 = torch_batch_norm_layer(x1)
+
+        x1 = tf.ones((batch, 1))  # C
+        tf_batch_norm_layer = keras.layers.BatchNormalization(
+            epsilon=epsilon,
+            momentum=momentum
+        )
+        tf_y1 = tf_batch_norm_layer(x1)
+
+        torch_np = torch_y1.detach().numpy()
+        tf_np = tf_y1.numpy()
+        assert torch_np.shape, "array torch_np is empty"
+        assert tf_np.shape, "array tf_np is empty"
         assert (np.array_equal(torch_np, tf_np))
 
 

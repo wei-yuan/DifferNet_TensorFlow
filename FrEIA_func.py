@@ -57,8 +57,6 @@ class CustomizedFullyConnectedLayer(keras.layers.Layer):
         self.nl1 = keras.layers.ReLU()
         self.nl2 = keras.layers.ReLU()
         self.nl2b = keras.layers.ReLU()
-        # nn.BatchNorm1d(size_in)
-        self.bn = keras.layers.BatchNormalization(size_in)
 
     def call(self, x):
         """transformation"""
