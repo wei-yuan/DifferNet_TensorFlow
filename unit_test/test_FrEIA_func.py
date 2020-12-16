@@ -21,6 +21,13 @@ class TestBasicLayers:
     def test_tf_tensor(self):
         assert (tf.ones((2, 1)).numpy() == np.ones((2, 1))).all()
 
+    def test_torch_and_tf_equaivalence(self):
+        max_val_of_int64 = 9223372036854775807
+        arr = [[max_val_of_int64], [max_val_of_int64]]
+        assert (
+            np.array_equal(tf.constant(arr, dtype=tf.int64).numpy(), torch.LongTensor(arr).numpy())
+        )
+
     def test_dropout(self):
         """
         torch.nn.Dropout(p: float = 0.5, inplace: bool = False)
@@ -109,6 +116,8 @@ class TestBasicLayers:
 
     def test_batch_norm(self):
         """
+        2020/12/16 Need to trace code
+
         torch.nn.BatchNorm1d(num_features, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
         see https://pytorch.org/docs/stable/generated/torch.nn.BatchNorm1d.html
         source code https://github.com/pytorch/pytorch/blob/master/torch/nn/modules/batchnorm.py
