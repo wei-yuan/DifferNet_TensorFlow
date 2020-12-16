@@ -2,6 +2,9 @@
 Tutorial:
 Making new layers and models via subclassing
 (https://keras.io/guides/making_new_layers_and_models_via_subclassing/)
+
+Convention:
+    TensorFlow: [Batch, height, width, color-channel]
 """
 from math import exp
 import tensorflow as tf
@@ -20,6 +23,7 @@ class DummyData:
 
 class Linear(keras.layers.Layer):
     """A single layer of fully connected layer"""
+
     def __init__(self, units=32, input_dim=32):
         super(Linear, self).__init__()
         self.w = self.add_weight(
@@ -38,6 +42,7 @@ class CustomizedFullyConnectedLayer(keras.layers.Layer):
     Fully connected transformation. In paper of DifferNet, this is a subnet called s and t.
     For more information, please see section 3.1.1 Architecture
     """
+
     def __init__(self, size_in, size, internal_size=None, dropout=0.0):
         """State: weights and biases"""
 
@@ -80,8 +85,8 @@ class PermuteLayer(keras.layers.Layer):
         for i, p in enumerate(self.perm):
             self.perm_inv[p] = i
 
-        self.perm = torch.LongTensor(self.perm)
-        self.perm_inv = torch.LongTensor(self.perm_inv)
+        self.perm = tf.constant(self.perm, dtype=tf.int64)
+        self.perm_inv = tf.constant(self.perm_inv, dtype=tf.int64)
 
     def call(self, x, rev=False):
         if not rev:
@@ -91,6 +96,40 @@ class PermuteLayer(keras.layers.Layer):
 
     def jacobian(self, x, rev=False):
         return 0
+
+    def output_dims(self, input_dims):
+        assert len(input_dims) == 1, "Can only use 1 input"
+        return input_dims
+
+
+class GlowCouplingLayer(keras.layers.Layer):
+
+    def __init__(self, dims_in, f_class=CustomizedFullyConnectedLayer, f_args={}, clamp=5.):
+        super(GlowCouplingLayer, self).__init__()
+        channels = dims_in[0][0]
+        self.ndims = len(dims_in[0])
+
+        self.split_len1 = channels // 2
+        self.split_len2 = channels - channels // 2
+
+        self.clamp = clamp
+        self.max_s = exp(clamp)
+        self.min_s = exp(-clamp)
+
+        self.s1 = f_class(self.split_len1, self.split_len2 * 2, **f_args)
+        self.s2 = f_class(self.split_len2, self.split_len1 * 2, **f_args)
+
+    def e(self, s):
+        return tf.math.exp(self.log_e(s))
+
+    def log_e(self, s):
+        return self.clamp * 0.636 * tf.math.atan(s / self.clamp)
+
+    def call(self, inputs, **kwargs):
+        raise NotImplementedError()
+
+    def jacobian(self):
+        raise NotImplementedError()
 
     def output_dims(self, input_dims):
         assert len(input_dims) == 1, "Can only use 1 input"
