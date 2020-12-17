@@ -22,6 +22,9 @@ class TestBasicLayers:
         assert (tf.ones((2, 1)).numpy() == np.ones((2, 1))).all()
 
     def test_torch_and_tf_equaivalence(self):
+        """
+        see https://johnwlambert.github.io/pytorch-tutorial/#data-types
+        """
         max_val_of_int64 = 9223372036854775807
         arr = [[max_val_of_int64], [max_val_of_int64]]
         assert (
