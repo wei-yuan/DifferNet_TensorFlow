@@ -232,9 +232,9 @@ class TestGlowCouplingLayer:
         tf.math.reduce_sum(input_tensor, axis=None, keepdims=False, name=None)
         see https://www.tensorflow.org/api_docs/python/tf/math/reduce_sum
         """
-        torch_t = torch.Tensor([5, -5])
-        tf_t = tf.constant([10, -10])
-        assert np.array_equal(torch.sum(torch_t), tf.math.reduce_sum(tf_t))
+        torch_t = torch.Tensor([[5, -5], [-5, 5]])
+        tf_t = tf.constant([[10, -10], [-10, 10]])
+        assert np.array_equal(torch.sum(torch_t, dim=1), tf.math.reduce_sum(tf_t, axis=1))
 
 
 if __name__ == '__main__':
