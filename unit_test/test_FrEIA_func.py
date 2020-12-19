@@ -95,10 +95,11 @@ class TestBasicLayers:
 
     def test_relu(self):
         """
-
-
         torch.nn.ReLU(inplace: bool = False)
         see https://pytorch.org/docs/stable/generated/torch.nn.ReLU.html
+
+        tf.keras.layers.ReLU(max_value=None, negative_slope=0, threshold=0, **kwargs)
+        see https://keras.io/api/layers/activation_layers/relu/
         """
         x1 = torch.ones((2, 1))
         torch_relu_layer = nn.ReLU()
@@ -117,6 +118,7 @@ class TestBasicLayers:
         # x_minus_1 = np.full((2, 1), -1)
         # torch_minus_1 = torch_relu_layer(x_minus_1)
 
+    # TODO: trace code and fix failed test
     def test_batch_norm(self):
         """
         2020/12/16 Need to trace code
