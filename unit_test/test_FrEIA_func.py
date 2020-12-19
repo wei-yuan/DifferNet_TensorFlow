@@ -77,7 +77,7 @@ class TestBasicLayers:
             # Initialize nn.Linear with specific weights
             # see https://discuss.pytorch.org/t/initialize-nn-linear-with-specific-weights/29005/3
             torch_linear_layer.weight.copy_(torch.ones(2, 1))
-            torch_linear_layer.bias.copy_(torch.zeros(2,))
+            torch_linear_layer.bias.copy_(torch.zeros(2, ))
             torch_y = torch_linear_layer(x)
 
         x = tf.ones((2, 1))
@@ -166,6 +166,29 @@ class TestBasicLayers:
         assert torch_np.shape, "array torch_np is empty"
         assert tf_np.shape, "array tf_np is empty"
         assert (np.array_equal(torch_np, tf_np))
+
+
+class TestGlowCouplingLayer:
+    """This unit test is to make sure every operation works like the API in PyTorch Library"""
+
+    def test_tenor_narrow(self):
+        """
+        torch.narrow(input, dim, start, length)
+        Returns a new tensor that is a narrowed version of input tensor.
+        see https://pytorch.org/docs/stable/generated/torch.narrow.html
+
+        TensorFlow can slices tensor in two means:
+            1. Use the indexing operator (based on tf.slice())
+            2. tf.gather()
+        here, we choose the first one, which is more intuitive
+        see https://stackoverflow.com/a/35158370/1115215
+        """
+        start = 0
+        length = 2
+        assert np.array_equal(
+            torch.narrow(input=torch.ones((2, 1)), dim=0, start=start, length=length).numpy(),
+            tf.ones((2, 1))[start:start + length, :].numpy()
+        )
 
 
 if __name__ == '__main__':
