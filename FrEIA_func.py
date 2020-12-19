@@ -125,8 +125,38 @@ class GlowCouplingLayer(keras.layers.Layer):
     def log_e(self, s):
         return self.clamp * 0.636 * tf.math.atan(s / self.clamp)
 
-    def call(self, inputs, **kwargs):
-        raise NotImplementedError()
+    def call(self, x, rev=False):
+        """
+        PyTorch prefers the data format of "NCHW", while TensorFlow prefers "NHWC".
+        Args:
+            x: input tensor
+            rev: ?
+        return:
+            y in list
+        """
+        x1, x2 = x[0][:, 0: self.split_len1], x[0][:, self.split_len1:(self.split_len1 + self.split_len2)]
+
+        if not rev:
+            r2 = self.s2(x2)
+            s2, t2 = r2[:, :self.split_len1], r2[:, self.split_len1:]
+            y1 = self.e(s2) * x1 + t2
+
+            r1 = self.s1(y1)
+            s1, t1 = r1[:, :self.split_len2], r1[:, self.split_len2:]
+            y2 = self.e(s1) * x2 + t1
+
+        else:  # names of x and y are swapped!
+            r1 = self.s1(x1)
+            s1, t1 = r1[:, :self.split_len2], r1[:, self.split_len2:]
+            y2 = (x2 - t1) / self.e(s1)
+
+            r2 = self.s2(y2)
+            s2, t2 = r2[:, :self.split_len1], r2[:, self.split_len1:]
+            y1 = (x1 - t2) / self.e(s2)
+
+        y = tf.concat([y1, y2], axis=1)
+        y = tf.clip_by_value(y, -1e6, 1e6)
+        return [y]
 
     def jacobian(self):
         raise NotImplementedError()
