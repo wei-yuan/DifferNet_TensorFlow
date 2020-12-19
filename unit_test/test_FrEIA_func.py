@@ -190,6 +190,39 @@ class TestGlowCouplingLayer:
             tf.ones((2, 1))[start:start + length, :].numpy()
         )
 
+    def test_tensor_cat(self):
+        """
+        torch.cat(tensors, dim=0, *, out=None)
+        see https://pytorch.org/docs/stable/generated/torch.cat.html
+
+        tf.concat(values, axis, name='concat')
+        see https://www.tensorflow.org/api_docs/python/tf/concat
+        """
+        torch_t = torch.ones((2, 1))
+        tf_t = tf.ones((2, 1))
+        assert np.array_equal(
+            torch.cat((torch_t, torch_t), dim=0).numpy(),
+            tf.concat([tf_t, tf_t], axis=0).numpy()
+        )
+
+    def test_tensor_clamp(self):
+        """
+        torch.clamp(input, min, max, *, out=None)
+        see https://pytorch.org/docs/stable/generated/torch.clamp.html
+
+        tf.clip_by_value(t, clip_value_min, clip_value_max, name=None)
+        see https://www.tensorflow.org/api_docs/python/tf/clip_by_value
+        """
+        # create tensor with different value
+        torch_t = torch.Tensor([3, -5])
+        tf_t = tf.constant([10, -10])
+        assert not np.array_equal(torch_t.numpy(), tf_t.numpy())
+        # clip the tensors by value
+        assert np.array_equal(
+            torch.clamp(torch_t, min=-1, max=1).numpy(),
+            tf.clip_by_value(tf_t, clip_value_min=-1, clip_value_max=1).numpy()
+        )
+
 
 if __name__ == '__main__':
     pass
