@@ -223,6 +223,19 @@ class TestGlowCouplingLayer:
             tf.clip_by_value(tf_t, clip_value_min=-1, clip_value_max=1).numpy()
         )
 
+    def test_tensor_sum(self):
+        """
+        torch.sum(input, *, dtype=None)
+        Returns the sum of all elements in the input tensor.
+        see https://pytorch.org/docs/stable/generated/torch.sum.html
+
+        tf.math.reduce_sum(input_tensor, axis=None, keepdims=False, name=None)
+        see https://www.tensorflow.org/api_docs/python/tf/math/reduce_sum
+        """
+        torch_t = torch.Tensor([5, -5])
+        tf_t = tf.constant([10, -10])
+        assert np.array_equal(torch.sum(torch_t), tf.math.reduce_sum(tf_t))
+
 
 if __name__ == '__main__':
     pass
