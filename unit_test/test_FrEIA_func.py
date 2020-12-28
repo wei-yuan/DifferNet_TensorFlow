@@ -237,5 +237,14 @@ class TestGlowCouplingLayer:
         assert np.array_equal(torch.sum(torch_t, dim=1), tf.math.reduce_sum(tf_t, axis=1))
 
 
+class TestReversibleGraphNet:
+
+    def test_gen_test_image_output_by_alexnet(self, resnet50_model):
+        pass
+
+    def test_layer(self):
+        pass
+
+
 if __name__ == '__main__':
     pass
