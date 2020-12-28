@@ -178,7 +178,7 @@ class GlowCouplingLayer(keras.layers.Layer):
             s2, t2 = r2[:, :self.split_len1], r2[:, self.split_len1:]
 
         jac = tf.math.reduce_sum(self.log_e(s1), axis=1) + tf.math.reduce_sum(self.log_e(s2), axis=1)
-        for i in range(self.ndims-1):
+        for i in range(self.ndims - 1):
             jac = tf.math.reduce_sum(jac, axis=1)
 
         return jac
@@ -186,3 +186,14 @@ class GlowCouplingLayer(keras.layers.Layer):
     def output_dims(self, input_dims):
         assert len(input_dims) == 1, "Can only use 1 input"
         return input_dims
+
+
+class ReversibleGraphNet:
+    """The class ReversibleGraphNet represents the invertible net. In PyTorch version, it has an additional option
+    'rev', which means the neural net can be computed in reverse
+    """
+
+    def __init__(self, verbose=False):
+        """Initialize the invertible neural network
+        """
+        pass
